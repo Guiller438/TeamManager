@@ -1,4 +1,5 @@
 ﻿using TeamManager.DTOs;
+using TeamManager.Models;
 
 namespace TeamManager.Services
 {
@@ -40,6 +41,10 @@ namespace TeamManager.Services
         Task DeleteTeamAsync(int id);
 
         Task<TeamDTO> GetTeamByNameAsync(string teamName);
+
+        Task AddCollaboratorsToTeamAsync(int teamId, List<int> userIds);
+        Task<IEnumerable<TfaUser>> GetCollaboratorsByTeamIdAsync(int teamId);
+
 
 
     }

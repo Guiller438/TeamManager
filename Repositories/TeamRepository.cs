@@ -62,6 +62,37 @@ namespace TeamManager.Repositories
                         .FirstOrDefaultAsync(t => t.TeamName == name); // Filtro para buscar por nombre
         }
 
+        public async Task AddCollaboratorsToTeamAsync(int teamId, List<int> userIds)
+        {
+            var existingCollaborators = await _context.TfaTeamsCollaborators
+                .Where(tc => tc.ColaboratorTeamID == teamId && userIds.Contains(tc.ColaboratorUsersID))
+                .Select(tc => tc.ColaboratorUsersID)
+                .ToListAsync();
 
+            var newCollaborators = userIds
+                .Where(userId => !existingCollaborators.Contains(userId))
+                .Select(userId => new TfaTeamCollaborators
+                {
+                    ColaboratorTeamID = teamId,
+                    ColaboratorUsersID = userId
+                }).ToList();
+
+            if (newCollaborators.Any())
+            {
+                _context.TfaTeamsCollaborators.AddRange(newCollaborators);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+
+        public async Task<IEnumerable<TfaUser>> GetCollaboratorsByTeamIdAsync(int teamId)
+        {
+            return await _context.TfaTeamsCollaborators
+                .Where(tc => tc.ColaboratorTeamID == teamId)
+                .Select(tc => tc.User)
+                .ToListAsync();
+        }
     }
+
 }
+

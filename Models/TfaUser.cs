@@ -26,4 +26,7 @@ public partial class TfaUser
     public virtual TfaRol? RolIdaddionalNavigation { get; set; }
 
     public virtual ICollection<TfaTeam> TfaTeams { get; set; } = new List<TfaTeam>();
+
+    public virtual ICollection<TfaTeamCollaborators> TeamCollaborations { get; set; } = new List<TfaTeamCollaborators>();
+
 }

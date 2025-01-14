@@ -12,6 +12,8 @@ namespace TeamManager.Repositories
         Task UpdateTeamAsync(TfaTeam team);
         Task DeleteTeamAsync(int id);
         Task<TfaTeam> GetByNameAsync(string name); // Asegúrate de que esté incluido
+        Task AddCollaboratorsToTeamAsync(int teamId, List<int> userIds);
+        Task<IEnumerable<TfaUser>> GetCollaboratorsByTeamIdAsync(int teamId);
 
 
     }

@@ -93,5 +93,32 @@ namespace TeamManager.Controllers
             return Ok(team);
         }
 
+        // Endpoint para agregar múltiples colaboradores
+        [HttpPost("{teamId}/add-collaborators")]
+        public async Task<IActionResult> AddCollaboratorsToTeam(int teamId, [FromBody] List<int> userIds)
+        {
+            if (userIds == null || !userIds.Any())
+            {
+                return BadRequest(new { Message = "The list of user IDs cannot be empty." });
+            }
+
+            await _teamService.AddCollaboratorsToTeamAsync(teamId, userIds);
+            return Ok(new { Message = "Collaborators added successfully to the team." });
+        }
+
+        // Endpoint para obtener colaboradores de un equipo
+        [HttpGet("{teamId}/collaborators")]
+        public async Task<IActionResult> GetCollaboratorsByTeamId(int teamId)
+        {
+            var collaborators = await _teamService.GetCollaboratorsByTeamIdAsync(teamId);
+
+            if (!collaborators.Any())
+            {
+                return NotFound(new { Message = $"No collaborators found for team ID {teamId}." });
+            }
+
+            return Ok(collaborators);
+        }
+
     }
 }

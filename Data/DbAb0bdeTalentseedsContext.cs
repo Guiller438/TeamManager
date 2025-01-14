@@ -26,6 +26,9 @@ public partial class DbAb0bdeTalentseedsContext : DbContext
 
     public virtual DbSet<TfaUser> TfaUsers { get; set; }
 
+    public virtual DbSet<TfaTeamCollaborators> TfaTeamsCollaborators { get; set; }
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Data Source=SQL1001.site4now.net;Initial Catalog=db_ab0bde_talentseeds;User Id=db_ab0bde_talentseeds_admin;Password=1qazxsw23edc");
@@ -142,6 +145,29 @@ public partial class DbAb0bdeTalentseedsContext : DbContext
                 .HasForeignKey(d => d.RolIdaddional)
                 .HasConstraintName("FK_userRolAddional");
         });
+
+        modelBuilder.Entity<TfaTeamCollaborators>(entity =>
+        {
+            entity.HasKey(e => new { e.ColaboratorTeamID, e.ColaboratorUsersID }); // Clave compuesta
+
+            entity.ToTable("TFA_TEAMS_COLABORATORS");
+
+            entity.Property(e => e.ColaboratorTeamID).HasColumnName("colaboratorTeamID");
+            entity.Property(e => e.ColaboratorUsersID).HasColumnName("colaboratorUsersID");
+
+            entity.HasOne(e => e.Team)
+                .WithMany(t => t.TeamCollaborators)
+                .HasForeignKey(e => e.ColaboratorTeamID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TFA_TEAMS_COLABORATORS_TFA_TEAMS");
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.TeamCollaborations)
+                .HasForeignKey(e => e.ColaboratorUsersID)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TFA_TEAMS_COLABORATORS_TFA_USERS");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

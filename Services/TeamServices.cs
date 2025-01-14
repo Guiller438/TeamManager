@@ -127,6 +127,28 @@ namespace TeamManager.Services
             };
         }
 
+        public async Task AddCollaboratorsToTeamAsync(int teamId, List<int> userIds)
+        {
+            if (userIds == null || !userIds.Any())
+            {
+                throw new ArgumentException("The list of user IDs cannot be null or empty.", nameof(userIds));
+            }
+
+            await _teamRepository.AddCollaboratorsToTeamAsync(teamId, userIds);
+        }
+
+        // Obtener colaboradores de un equipo
+        public async Task<IEnumerable<TfaUser>> GetCollaboratorsByTeamIdAsync(int teamId)
+        {
+            var collaborators = await _teamRepository.GetCollaboratorsByTeamIdAsync(teamId);
+            if (!collaborators.Any())
+            {
+                throw new KeyNotFoundException($"No collaborators found for team ID {teamId}.");
+            }
+
+            return collaborators;
+        }
+
 
     }
 }

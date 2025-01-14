@@ -22,4 +22,7 @@ public partial class TfaTeam
     public virtual TfaUser? TeamLead { get; set; }
 
     public virtual TfaTeamstatus TeamStatus { get; set; } = null!;
+
+    public virtual ICollection<TfaTeamCollaborators> TeamCollaborators { get; set; } = new List<TfaTeamCollaborators>();
+
 }
