@@ -59,7 +59,7 @@ namespace TeamManager.Services
 
             };
         }
-        public async Task AddTeamAsync(TeamDTO teamDto, bool isAutomatic)
+        public async Task<TfaTeam> AddTeamAsync(TeamDTO teamDto, bool isAutomatic)
         {
             // Validar líder obligatorio
             if (teamDto.TeamLeadId == null || teamDto.TeamLeadId <= 0)
@@ -67,8 +67,15 @@ namespace TeamManager.Services
                 throw new ArgumentException("Un equipo no puede ser creado sin un líder.");
             }
 
-            // Determinar estado del equipo: 1 (manual) o 2 (automático)
-            teamDto.TeamStatusId = isAutomatic ? 1 : 2;
+            // Manejo de bool
+            if (!isAutomatic)
+            {
+                teamDto.TeamStatusId = 2;
+            }
+            else
+            {
+                teamDto.TeamStatusId = 1;
+            }
 
             var team = new TfaTeam
             {
@@ -82,6 +89,8 @@ namespace TeamManager.Services
             // Agregar a la base de datos
             _context.TfaTeams.Add(team);
             await _context.SaveChangesAsync();
+
+            return team;
 
         }
 
@@ -147,6 +156,16 @@ namespace TeamManager.Services
             }
 
             return collaborators;
+        }
+
+        public async Task<IEnumerable<TfaUser>> GetLeadersandAdmins()
+        {
+            return await _teamRepository.GetLeadersandAdmins();
+        }
+
+        public async Task<IEnumerable<TfaUser>> GetColaborators()
+        {
+            return await _teamRepository.GetColaborators();
         }
 
 

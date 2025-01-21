@@ -18,14 +18,14 @@ namespace TeamManager.Controllers
             _teamService = teamService;
         }
 
-        [HttpGet]
+        [HttpGet("getAllTeams")]
         public async Task<IActionResult> GetAllTeams()
         {
             var teams = await _teamService.GetAllTeamsAsync();
             return Ok(teams);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("getTeamById/{id}")]
         public async Task<IActionResult> GetTeamById(int id)
         {
             var team = await _teamService.GetTeamByIdAsync(id);
@@ -34,16 +34,53 @@ namespace TeamManager.Controllers
             return Ok(team);
         }
 
-        [HttpPost("{isAutomatic}")]
-        public async Task<IActionResult> AddTeam([FromBody] TeamDTO teamDto, bool isAutomatic)
+        [HttpPost("solicitarEquipo")]
+        public async Task<IActionResult> SolicitarEquipos([FromBody] AddTeamsWithColaboratorsDTO request)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var isAutomatic = false;
+            // Agregar el equipo primero
+            var teamId = await _teamService.AddTeamAsync(request.Team, isAutomatic);
 
-            await _teamService.AddTeamAsync(teamDto, isAutomatic);
-            return CreatedAtAction(nameof(GetTeamById), new { id = teamDto.TeamId }, teamDto);
+            // Agregar colaboradores si la lista no está vacía
+            if (request.UserIds != null && request.UserIds.Any())
+            {
+                await _teamService.AddCollaboratorsToTeamAsync(teamId.TeamId, request.UserIds);
+            }
+
+            return CreatedAtAction(nameof(GetTeamById), new { id = teamId }, new
+            {
+                Message = "Team created successfully with collaborators.",
+                TeamId = teamId
+            });
         }
 
-        [HttpPut("{id}")]
+        [HttpPost("crearEquipoAdministrador")]
+        public async Task<IActionResult> crearEquipoAdministrador([FromBody] AddTeamsWithColaboratorsDTO request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var isAutomatic = true;
+            // Agregar el equipo primero
+            var teamId = await _teamService.AddTeamAsync(request.Team, isAutomatic);
+
+            // Agregar colaboradores si la lista no está vacía
+            if (request.UserIds != null && request.UserIds.Any())
+            {
+                await _teamService.AddCollaboratorsToTeamAsync(teamId.TeamId, request.UserIds);
+            }
+
+            return CreatedAtAction(nameof(GetTeamById), new { id = teamId }, new
+            {
+                Message = "Team created successfully with collaborators.",
+                TeamId = teamId
+            });
+
+
+        }
+
+        [HttpPut("updateTeam/{id}")]
         public async Task<IActionResult> UpdateTeam(int id, [FromBody] TeamDTO teamDto)
         {
             if (!ModelState.IsValid || id != teamDto.TeamId) return BadRequest();
@@ -52,62 +89,23 @@ namespace TeamManager.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("deleteTeam/{id}")]
         public async Task<IActionResult> DeleteTeam(int id)
         {
             await _teamService.DeleteTeamAsync(id);
             return NoContent();
         }
 
-        [HttpPost("manual")]
-        public async Task<IActionResult> CreateTeamManual([FromBody] TeamDTO teamDto, bool isAutomatic)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
 
-            
-
-            try
-            {
-                // Llamar al servicio para crear el equipo
-                await _teamService.AddTeamAsync(teamDto, isAutomatic: true);
-
-                // Retornar una respuesta sin el ID del equipo
-                return Ok(new { message = "Equipo creado exitosamente." });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                //Logger.LogError(ex, "Error al crear el equipo.");
-                return StatusCode(500, "Ocurrió un error interno del servidor.");
-            }
-        }
-
-        [HttpGet("GetByName")]
+        [HttpGet("teampornombre/GetByName")]
         public async Task<IActionResult> GetByName(string name)
         {
             var team = await _teamService.GetTeamByNameAsync(name);
             return Ok(team);
         }
 
-        // Endpoint para agregar múltiples colaboradores
-        [HttpPost("{teamId}/add-collaborators")]
-        public async Task<IActionResult> AddCollaboratorsToTeam(int teamId, [FromBody] List<int> userIds)
-        {
-            if (userIds == null || !userIds.Any())
-            {
-                return BadRequest(new { Message = "The list of user IDs cannot be empty." });
-            }
-
-            await _teamService.AddCollaboratorsToTeamAsync(teamId, userIds);
-            return Ok(new { Message = "Collaborators added successfully to the team." });
-        }
-
         // Endpoint para obtener colaboradores de un equipo
-        [HttpGet("{teamId}/collaborators")]
+        [HttpGet("collaborators/{teamId}")]
         public async Task<IActionResult> GetCollaboratorsByTeamId(int teamId)
         {
             var collaborators = await _teamService.GetCollaboratorsByTeamIdAsync(teamId);
@@ -118,6 +116,21 @@ namespace TeamManager.Controllers
             }
 
             return Ok(collaborators);
+        }
+
+        [HttpGet("leadersandadmins")]
+        public async Task<IActionResult> GetLeadersandAdmins()
+        {
+            var leadersandadmins = await _teamService.GetLeadersandAdmins();
+            return Ok(leadersandadmins);
+        }
+
+        [HttpGet("colaborators")]
+
+        public async Task<IActionResult> GetColaborators()
+        {
+            var colaborators = await _teamService.GetColaborators();
+            return Ok(colaborators);
         }
 
     }

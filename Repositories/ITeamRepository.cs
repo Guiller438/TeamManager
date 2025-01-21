@@ -15,6 +15,9 @@ namespace TeamManager.Repositories
         Task AddCollaboratorsToTeamAsync(int teamId, List<int> userIds);
         Task<IEnumerable<TfaUser>> GetCollaboratorsByTeamIdAsync(int teamId);
 
+        Task<IEnumerable<TfaUser>> GetLeadersandAdmins();
+        Task<IEnumerable<TfaUser>> GetColaborators();
+
 
     }
 }

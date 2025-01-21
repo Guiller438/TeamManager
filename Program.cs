@@ -13,6 +13,12 @@ builder.Services.AddScoped<ITeamStatusRepository, TeamStatusRepository>();
 builder.Services.AddScoped<ITeamRepository, TeamRepository>();
 builder.Services.AddScoped<ITeamServices, TeamServices>();
 
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true; // Opcional, para formatear el JSON
+});
+
 
 
 builder.Services.AddControllers();
