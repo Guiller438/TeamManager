@@ -28,6 +28,8 @@ public partial class DbAb0bdeTalentseedsContext : DbContext
 
     public virtual DbSet<TfaTeamCollaborators> TfaTeamsCollaborators { get; set; }
 
+    public virtual DbSet<TfaTeamsCategories> TfaTeamsCategories { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -39,11 +41,11 @@ public partial class DbAb0bdeTalentseedsContext : DbContext
 
         modelBuilder.Entity<TfaCategory>(entity =>
         {
-            entity.HasKey(e => e.CategoryId).HasName("PK__TFA_CATE__23CAF1F8D2B0FF74");
+            entity.HasKey(e => e.CategoryID).HasName("PK__TFA_CATE__23CAF1F8D2B0FF74");
 
             entity.ToTable("TFA_CATEGORIES");
 
-            entity.Property(e => e.CategoryId).HasColumnName("categoryID");
+            entity.Property(e => e.CategoryID).HasColumnName("categoryID");
             entity.Property(e => e.CategoryDeadLine).HasColumnName("categoryDeadLine");
             entity.Property(e => e.CategoryDescription)
                 .HasMaxLength(100)
@@ -168,6 +170,27 @@ public partial class DbAb0bdeTalentseedsContext : DbContext
                 .HasConstraintName("FK_TFA_TEAMS_COLABORATORS_TFA_USERS");
         });
 
+        modelBuilder.Entity<TfaTeamsCategories>(entity =>
+        {
+            entity.ToTable("TFA_TEAMS_CATEGORIES");
+
+            entity.HasKey(tc => new { tc.TeamId, tc.CategoriesId });
+
+            entity.Property(tc => tc.TeamId).HasColumnName("teamID");
+            entity.Property(tc => tc.CategoriesId).HasColumnName("categoriesID");
+
+            entity.HasOne(tc => tc.Team)
+                .WithMany(t => t.TeamsCategories)
+                .HasForeignKey(tc => tc.TeamId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TFA_TEAMS_CATEGORIES_TEAM");
+
+            entity.HasOne(tc => tc.Category)
+                .WithMany(c => c.TeamsCategories)
+                .HasForeignKey(tc => tc.CategoriesId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TFA_TEAMS_CATEGORIES_CATEGORY");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -50,22 +50,21 @@ namespace TeamManager.Repositories
 
             if (team != null)
             {
-                // Eliminar registros de la tabla intermedia tfa_teams_colaborators
+                // Eliminar relaciones en TFA_TEAMS_CATEGORIES
+                var teamCategories = _context.TfaTeamsCategories
+                    .Where(tc => tc.TeamId == id);
+
+                _context.TfaTeamsCategories.RemoveRange(teamCategories);
+
+                // Eliminar relaciones en TFA_TEAMS_COLABORATORS
                 var teamCollaborators = _context.TfaTeamsCollaborators
                     .Where(tc => tc.ColaboratorTeamID == id);
 
                 _context.TfaTeamsCollaborators.RemoveRange(teamCollaborators);
 
-                // Eliminar registros de la tabla intermedia tfa_teams_categories
-                //var teamCategories = _context.
-                //    .Where(tc => tc.TeamId == id);
-
-                //_context.TfaTeamsCategories.RemoveRange(teamCategories);
-
-                // Guardar cambios después de eliminar las referencias
                 await _context.SaveChangesAsync();
 
-                // Finalmente, eliminar el equipo de la tabla principal
+                // Finalmente, eliminar el equipo
                 _context.TfaTeams.Remove(team);
                 await _context.SaveChangesAsync();
             }

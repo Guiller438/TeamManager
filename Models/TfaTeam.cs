@@ -25,4 +25,7 @@ public partial class TfaTeam
 
     public virtual ICollection<TfaTeamCollaborators> TeamCollaborators { get; set; } = new List<TfaTeamCollaborators>();
 
+    public virtual ICollection<TfaTeamsCategories> TeamsCategories { get; set; } = new List<TfaTeamsCategories>();
+
+
 }
